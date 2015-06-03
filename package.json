@@ -1,13 +1,17 @@
 {
-  "name": "irc-goog-relay",
-  "version": "1.0.0",
-  "description": "",
+  "name": "kanbasnat",
+  "version": "0.0.1",
+	"keywords": ["irc", "google hangouts", "relay"],
+  "description": "A program to link a 'Hangout' chat to an irc channel and relay messages between them",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Euank",
-  "license": "AGPLv3",
+	"homepage": "https://github.com/euank/kanbasnat",
+	"repository": "euank/kanbasnat",
+	"os": ["linux"],
+  "license": "AGPL-3.0",
   "dependencies": {
     "hangupsjs": "^0.7.4",
     "memory-cache": "^0.1.2",
