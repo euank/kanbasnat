@@ -1,0 +1,17 @@
+{
+  "name": "irc-goog-relay",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Euank",
+  "license": "AGPLv3",
+  "dependencies": {
+    "hangupsjs": "^0.7.4",
+    "memory-cache": "^0.1.2",
+    "q": "^1.4.1",
+    "slate-irc": "^0.8.1"
+  }
+}

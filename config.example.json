@@ -1,0 +1,11 @@
+{
+	"nick": "hangout",
+	"channel": "#kanbachan",
+	"hangout_id": "hangoutId",
+	"port": 6697,
+	"host": "irc.freenode.net",
+	"secureCert": true,
+	"id_name_map": {
+		"google_id": "irc_display_name"
+	}
+}
