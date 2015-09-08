@@ -80,7 +80,7 @@ function addHandlers() {
 			irc.send(config.channel, name + ": " + parseSegments(msg.chat_message.message_content));
 		}).fail(function(err) {
 			console.log("Error getting name to send irc message", err);
-		})
+		});
 	});
 	return Q(true);
 }
@@ -96,12 +96,17 @@ function connectToIrc() {
 		irc.nick(config.nick);
 		irc.on('welcome', function(nick) {
 			console.log("Connected to irc as " + nick);
-			irc.join(config.channel)
+			irc.join(config.channel);
 			resolve();
-		})
+		});
+    irc.on('disconnect', function() {
+      console.log("Got disconnected from IRC; balls");
+      // TODO, handle better
+      process.exit(1);
+    });
 	});
 }
 
 Q.all([connectToIrc(), connectToHangouts()]).then(getOwnId()).then(addHandlers).fail(function(err) {
-	console.log(err.stack)
+	console.log(err.stack);
 });
