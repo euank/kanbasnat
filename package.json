@@ -1,22 +1,29 @@
 {
-	"name": "kanbasnat",
-	"version": "0.0.1",
-	"keywords": ["irc", "google hangouts", "relay"],
-	"description": "A program to link a 'Hangout' chat to an irc channel and relay messages between them",
-	"main": "index.js",
-	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1",
-		"start": "node index.js"
-	},
-	"author": "Euank",
-	"homepage": "https://github.com/euank/kanbasnat",
-	"repository": "euank/kanbasnat",
-	"os": ["linux"],
-	"license": "AGPL-3.0",
-	"dependencies": {
-		"hangupsjs": "^0.7.4",
-		"memory-cache": "^0.1.2",
-		"q": "^1.4.1",
-		"slate-irc": "git://github.com/slate/slate-irc#6f2c820ee6afd28b935deafae99c1760b14e6341"
-	}
+  "name": "kanbasnat",
+  "version": "0.0.1",
+  "keywords": [
+    "irc",
+    "google hangouts",
+    "relay"
+  ],
+  "description": "A program to link a 'Hangout' chat to an irc channel and relay messages between them",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "Euank",
+  "homepage": "https://github.com/euank/kanbasnat",
+  "repository": "euank/kanbasnat",
+  "os": [
+    "linux"
+  ],
+  "license": "AGPL-3.0",
+  "dependencies": {
+    "eu-node-config": "0.0.4",
+    "hangupsjs": "^0.7.4",
+    "memory-cache": "^0.1.2",
+    "q": "^1.4.1",
+    "slate-irc": "git://github.com/slate/slate-irc#6f2c820ee6afd28b935deafae99c1760b14e6341"
+  }
 }
