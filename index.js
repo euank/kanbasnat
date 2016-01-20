@@ -1,17 +1,19 @@
+/*jslint node: true */
+"use strict";
 var Hangups      = require('hangupsjs'),
     slate        = require('slate-irc'),
     tls          = require('tls'),
     configLoader = require('eu-node-config'),
-    config       = require('./config.json'),
     cache        = require('memory-cache'),
     Q            = require('q'),
-    log          = require('winston');
+    log          = require('winston'),
+    fs           = require('fs');
 
-let hangouts = new Hangups();
+let hangouts = new Hangups({cookiespath: './cookies.json'});
 let irc;
 // TODO, global variables :(((
 //hangouts.loglevel('debug');
-
+let config;
 let ownId;
 
 
@@ -47,7 +49,7 @@ function parseSegments(segments) {
   return out.join(" - ");
 }
 
-function getName(id) {
+function getName(config, id) {
   if(config.id_name_map[id]) {
     return Q(config.id_name_map[id]);
   }
@@ -64,6 +66,7 @@ function getName(id) {
 }
 
 function getOwnId() {
+  log.debug("Getting own id...");
   return hangouts.getselfinfo().then(function(info) {
     ownId = info.self_entity.id.gaia_id;
   });
@@ -72,7 +75,7 @@ function getOwnId() {
 function addHandlers() {
   irc.on('message', (msg) => {
     let txtBuilder = new Hangups.MessageBuilder();
-    hangouts.sendchatmessage(config.hangout_id, txtBuilder.text("<"+msg.from+"> " + msg.message).toSegments()).fail((err) => {
+    hangouts.sendchatmessage(config.hangoutId, txtBuilder.text("<"+msg.from+"> " + msg.message).toSegments()).fail((err) => {
       console.log("Err sending hangout message", err);
     });
   });
@@ -81,33 +84,58 @@ function addHandlers() {
       // ignore stuff I said
       return;
     }
-    getName(msg.sender_id.gaia_id).then((name) => {
+    getName(config, msg.sender_id.gaia_id).then((name) => {
       irc.send(config.channel, name + ": " + parseSegments(msg.chat_message.message_content));
     }).fail((err) => {
       console.log("Error getting name to send irc message", err);
     });
   });
   hangouts.on('connect_failed', () => {
-    winston.error("hangouts connection failed");
+    log.error("hangouts connection failed");
     process.exit(1);
   });
   return Q(true);
 }
 
-function s3Auth(config) {
+function ircAuth(config) {
   return Q.Promise((resolve, reject) => {
-    reject("TODO");
+    irc.send(config.owner, "You should auth me! " + Hangups.OAUTH2_LOGIN_URL);
+    let handleResponse = (msg) => {
+      if(msg.from == config.owner) {
+        resolve(msg.message);
+        irc.removeListener('message', handleResponse);
+      }
+    };
+    irc.on('message', handleResponse);
   });
 }
 
-function ircAuth(config) {
-  return Q.Promise((resolve, reject) => {
+const filePath = "/var/lib/kanbasnat/auth.json";
+
+function fileAuth() {
+  return Q.nfbind(fs.stat)(filePath)
+  .then(Q.nfbind(fs.readFile)(filePath, "utf-8"));
+}
+
+function authPromise() {
+  return fileAuth().fail(() => {
+    log.info("Asking via irc auth");
+    return ircAuth(config).then((authData) => {
+      return Q.Promise((resolve, reject) => {
+        fs.writeFile(filePath, authData, (err) => {
+          log.error("Couldn't write auth to disk: ", err);
+          resolve(authData);
+        });
+      });
+    });
   });
 }
 
 function connectToHangouts(config) {
-  return hangouts.connect(() => ({auth: Hangups.authStdin}));
+  log.info("Connecting to hangouts...");
+  return hangouts.connect(() => ({auth: authPromise}));
 }
+
 function connectToIrc(config) {
   return Q.Promise(function(resolve, reject) {
     let stream = tls.connect({port: config.port, host: config.host, rejectUnauthorized: config.secureCert});
@@ -115,12 +143,12 @@ function connectToIrc(config) {
     irc.user("kanbasnat", "kanbasnat");
     irc.nick(config.nick);
     irc.on('welcome', function(nick) {
-      console.log("Connected to irc as " + nick);
+      log.info("Connected to irc as " + nick);
       irc.join(config.channel);
       resolve(config);
     });
     irc.on('disconnect', () => {
-      winston.error("IRC disconnect; exiting to restart");
+      log.error("IRC disconnect; exiting to restart");
       // TODO, handle better
       process.exit(1);
     });
@@ -132,15 +160,21 @@ configLoader.loadConfig({
   nick: 'kanbasnat',
   port: 6697,
   host: {required: true},
-  hangoutChannels: {required: true},
+  channel: {required: true},
+  hangoutId: {required: true},
   idNameMap: {default: {}},
   owner: {required: true},
   s3Bucket: {required: false},
+}).then((conf) => {
+  log.debug("loaded config", conf);
+  // Eww, cache globally for later steps, (specifically addHandlers) TODO
+  config = conf;
+  return conf;
 })
 .then(connectToIrc)
 .then(connectToHangouts)
 .then(getOwnId)
 .then(addHandlers)
 .fail((err) => {
-  winston.error(err);
-});
+  log.error(err);
+}).done();
