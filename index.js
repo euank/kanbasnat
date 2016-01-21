@@ -138,7 +138,7 @@ function connectToHangouts(config) {
 
 function connectToIrc(config) {
   return Q.Promise(function(resolve, reject) {
-    let stream = tls.connect({port: config.port, host: config.host, rejectUnauthorized: config.secureCert});
+    let stream = tls.connect({port: config.port, host: config.host, rejectUnauthorized: config.secureCert.toString() !== "false"});
     irc = slate(stream);
     irc.user("kanbasnat", "kanbasnat");
     irc.nick(config.nick);
