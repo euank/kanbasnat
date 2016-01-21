@@ -17,7 +17,7 @@ docker run -e nick=nickname -e channel="#kanbasnat" -e hangoutId=XXXX -e owner=m
 
 On the first run, it will ask you via irc (please configure owner!) to follow a link and respond with an OAUTH token for the google account you'll use this with.
 
-**NOTE** that the auth information is stored a) in a file in the cwd named `cookies.json` and, in addition, in `/var/lib/kanbasnat/auth.json` if possible.
+**NOTE** that the auth information is stored a) in a file named `cookies.json` in `/var/lib/kanbasnat/cookies.json` if possible.
 
 On each run after the first, if the above file is present that file will be used to auth. If it is not, it will again ask you over irc for the token.
 Remember to practice safe SSL when giving google oauth tokens to bots :)

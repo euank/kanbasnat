@@ -9,7 +9,7 @@ var Hangups      = require('hangupsjs'),
     log          = require('winston'),
     fs           = require('fs');
 
-let hangouts = new Hangups({cookiespath: './cookies.json'});
+let hangouts = new Hangups({cookiespath: '/var/lib/kanbasnat/cookies.json'});
 let irc;
 // TODO, global variables :(((
 //hangouts.loglevel('debug');
@@ -110,27 +110,9 @@ function ircAuth(config) {
   });
 }
 
-const filePath = "/var/lib/kanbasnat/auth.json";
-
-function fileAuth() {
-  return Q.nfbind(fs.stat)(filePath)
-  .then(Q.nfbind(fs.readFile)(filePath, "utf-8"));
-}
-
 function authPromise() {
-  return fileAuth().fail(() => {
-    log.info("Asking via irc auth");
-    return ircAuth(config).then((authData) => {
-      return Q.Promise((resolve, reject) => {
-        fs.writeFile(filePath, authData, (err) => {
-          if(err) {
-            log.error("Couldn't write auth to disk: ", err);
-          }
-          resolve(authData);
-        });
-      });
-    });
-  });
+  log.info("Asking via irc auth");
+  return ircAuth(config);
 }
 
 function connectToHangouts(config) {
