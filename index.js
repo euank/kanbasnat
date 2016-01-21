@@ -50,8 +50,8 @@ function parseSegments(segments) {
 }
 
 function getName(config, id) {
-  if(config.id_name_map[id]) {
-    return Q(config.id_name_map[id]);
+  if(config.idNameMap[id]) {
+    return Q(config.idNameMap[id]);
   }
   let cached = cache.get("uid." + id);
   if(cached) {
@@ -87,7 +87,7 @@ function addHandlers() {
     getName(config, msg.sender_id.gaia_id).then((name) => {
       irc.send(config.channel, name + ": " + parseSegments(msg.chat_message.message_content));
     }).fail((err) => {
-      console.log("Error getting name to send irc message", err);
+      log.error("Error getting name to send irc message", err);
     });
   });
   hangouts.on('connect_failed', () => {
