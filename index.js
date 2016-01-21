@@ -123,7 +123,9 @@ function authPromise() {
     return ircAuth(config).then((authData) => {
       return Q.Promise((resolve, reject) => {
         fs.writeFile(filePath, authData, (err) => {
-          log.error("Couldn't write auth to disk: ", err);
+          if(err) {
+            log.error("Couldn't write auth to disk: ", err);
+          }
           resolve(authData);
         });
       });
